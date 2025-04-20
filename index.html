@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Brainrot Ball Animation Generator</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: #ffffff;
+        }
+        .title {
+            margin: 30px 0;
+            font-size: 2.5em;
+            font-weight: bold;
+            text-align: center;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .game-container {
+            text-align: center;
+            background: rgba(42, 42, 42, 0.8);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+        }
+        canvas {
+            border: 2px solid #333;
+            background-color: #2a2a2a;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            border-radius: 8px;
+        }
+        .controls {
+            margin-top: 20px;
+            background: rgba(42, 42, 42, 0.6);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            display: inline-block;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .color-controls {
+            margin: 15px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .pattern-selector {
+            margin: 15px 0;
+        }
+        .pattern-selector select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background-color: #333;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .pattern-selector select:hover {
+            border-color: #666;
+            background-color: #3a3a3a;
+        }
+        .color-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .color-control label {
+            min-width: 120px;
+            color: #ddd;
+        }
+        .opacity-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .opacity-control label {
+            min-width: 120px;
+            color: #ddd;
+        }
+        input[type="color"] {
+            width: 50px;
+            height: 30px;
+            padding: 0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        input[type="color"]:hover {
+            transform: scale(1.05);
+        }
+        input[type="range"] {
+            width: 150px;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #4CAF50;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: #45a049;
+            transform: scale(1.1);
+        }
+        button {
+            padding: 12px 24px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.2);
+        }
+        .stats {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #ffffff;
+            background: rgba(42, 42, 42, 0.6);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .number-input {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            display: none;
+        }
+        .number-input.visible {
+            display: flex;
+        }
+        .number-input input[type="number"] {
+            width: 80px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background-color: #333;
+            color: white;
+            font-size: 14px;
+        }
+        .file-input {
+            margin: 10px 0;
+        }
+        .file-input input[type="file"] {
+            display: none;
+        }
+        .file-input label {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .file-input label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.2);
+        }
+        .recording-controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .recording-controls.hidden {
+            display: none;
+        }
+        .physics-controls {
+            margin: 15px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: rgba(42, 42, 42, 0.4);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .physics-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .physics-control label {
+            min-width: 120px;
+            color: #ddd;
+        }
+        .physics-control input[type="number"] {
+            width: 80px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background-color: #333;
+            color: white;
+            font-size: 14px;
+        }
+        .physics-control span {
+            min-width: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="title">TikTok Brainrot Ball Animation Generator</h1>
+    <div class="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div class="controls">
+            <button onclick="resetGame()">Reset Game</button>
+            <button onclick="togglePause()">Pause/Resume</button>
+            <button onclick="resetAndRecord()">Reset & Record</button>
+            <button id="muteButton" onclick="toggleMute()">🔊 Mute</button>
+            <div class="file-input">
+                <label for="backgroundImage">Choose Background Image</label>
+                <input type="file" id="backgroundImage" accept="image/*" onchange="handleImageUpload(event)">
+            </div>
+            <button onclick="removeBackgroundImage()">Remove Background Image</button>
+            <div class="physics-controls">
+                <div class="physics-control">
+                    <label for="gravity">Gravity:</label>
+                    <input type="range" id="gravity" min="5" max="50" value="20" onchange="updateGravity(this.value)">
+                    <span id="gravityValue">20</span>
+                </div>
+                <div class="physics-control">
+                    <label for="initialBallSize">Initial Ball Size:</label>
+                    <input type="number" id="initialBallSize" min="5" max="50" value="20" onchange="updateInitialBallSize(this.value)">
+                </div>
+                <div class="physics-control">
+                    <label for="growthRate">Growth Rate:</label>
+                    <input type="number" id="growthRate" min="0" max="0.2" step="0.01" value="0.05" onchange="updateGrowthRate(this.value)">
+                </div>
+                <div class="physics-control">
+                    <label for="ballColor">Ball Color:</label>
+                    <input type="color" id="ballColor" value="#0000FF" onchange="updateBallColor(this.value)">
+                </div>
+                <div class="physics-control">
+                    <label for="ballImage">Ball Image:</label>
+                    <input type="file" id="ballImage" accept="image/*" onchange="handleBallImageUpload(event)">
+                    <button onclick="removeBallImage()">Remove Image</button>
+                </div>
+                <div class="physics-control">
+                    <label for="circleColor">Circle Color:</label>
+                    <input type="color" id="circleColor" value="#FFFFFF" onchange="updateCircleColor(this.value)">
+                </div>
+                <div class="physics-control">
+                    <label for="arenaColor">Arena Background:</label>
+                    <input type="color" id="arenaColor" value="#000000" onchange="updateArenaColor(this.value)">
+                </div>
+                <div class="physics-control">
+                    <label for="circleOpacity">Circle Opacity:</label>
+                    <input type="range" id="circleOpacity" min="0" max="100" value="100" onchange="updateCircleOpacity(this.value)">
+                    <span id="opacityValue">100%</span>
+                </div>
+                <div class="physics-control">
+                    <label for="bounceSound">Bounce Sound:</label>
+                    <input type="file" id="bounceSound" accept="audio/*" onchange="handleBounceSoundUpload(event)">
+                    <button onclick="previewBounceSound()">Preview</button>
+                </div>
+                <div class="physics-control">
+                    <label for="collisionSound">Collision Sound:</label>
+                    <input type="file" id="collisionSound" accept="audio/*" onchange="handleCollisionSoundUpload(event)">
+                    <button onclick="previewCollisionSound()">Preview</button>
+                </div>
+            </div>
+            <div class="pattern-selector">
+                <label for="patternType">Pattern Type:</label>
+                <select id="patternType" onchange="updatePatternType(this.value)">
+                    <option value="particles">Particles</option>
+                    <option value="circles">Circles</option>
+                </select>
+            </div>
+        </div>
+        <div class="stats">
+            <p>Ball Size: <span id="ballSize">25</span></p>
+        </div>
+        <div class="number-input" id="particleCountInput">
+            <label for="particleCount">Number of Particles:</label>
+            <input type="number" id="particleCount" min="100" max="5000" value="3000" onchange="updateParticleCount(this.value)">
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const ballSizeElement = document.getElementById('ballSize');
+        let backgroundImage = null;
+        let lastFrameTime = 0;
+        const targetFPS = 60;
+        const frameInterval = 1000 / targetFPS;
+
+        // Set canvas size
+        canvas.width = 800;
+        canvas.height = 600;
+
+        // Game configuration
+        const WIDTH = canvas.width;
+        const HEIGHT = canvas.height;
+        const CENTER_X = WIDTH / 2;
+        const CENTER_Y = HEIGHT / 2;
+        const ARENA_RADIUS = 250;
+        let INITIAL_BALL_RADIUS = 20;
+        const SMALL_RADIUS = 2;
+        let GRAVITY = 20;
+        const BOUNCE_FACTOR = 0.997;
+        const RANDOM_BOUNCE = 0.3;
+        const ROTATION_SPEED = 0.20;
+        let BALL_GROWTH_RATE = 0.05;
+        const NO_COLLISION_LIMIT = 10.0;
+        let PARTICLE_COUNT = 3000;
+        const PARTICLE_SPEED = 0.5;
+
+        // Audio setup
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let masterGain = audioContext.createGain();
+        masterGain.gain.value = 0.5;
+        masterGain.connect(audioContext.destination);
+        let isMuted = false;
+
+        // Sound buffers
+        let bounceSoundBuffer = null;
+        let collisionSoundBuffer = null;
+
+        function loadSoundFile(file, callback) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                audioContext.decodeAudioData(e.target.result, function(buffer) {
+                    callback(buffer);
+                });
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function playBounceSound(speed) {
+            if (isMuted) return;
+
+            if (bounceSoundBuffer) {
+                const source = audioContext.createBufferSource();
+                const gainNode = audioContext.createGain();
+                
+                source.buffer = bounceSoundBuffer;
+                gainNode.gain.value = 0.5;
+                
+                source.connect(gainNode);
+                gainNode.connect(masterGain);
+                
+                source.start();
+                source.stop(audioContext.currentTime + bounceSoundBuffer.duration);
+            } else {
+                // Create noise source for impact
+                const noise = audioContext.createBufferSource();
+                const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.1, audioContext.sampleRate);
+                const noiseData = noiseBuffer.getChannelData(0);
+                for (let i = 0; i < noiseData.length; i++) {
+                    noiseData[i] = Math.random() * 2 - 1;
+                }
+                noise.buffer = noiseBuffer;
+
+                // Create filter for the noise
+                const filter = audioContext.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.value = 800 + (speed * 20);
+                filter.Q.value = 4;
+
+                // Create envelope for the noise
+                const noiseGain = audioContext.createGain();
+                noiseGain.gain.value = 0.2;
+                noiseGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+                // Create main oscillator for the bounce
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.value = 100 + (speed * 10);
+                
+                gainNode.gain.value = 0.3;
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+
+                // Connect everything
+                noise.connect(filter);
+                filter.connect(noiseGain);
+                noiseGain.connect(masterGain);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(masterGain);
+
+                // Start and stop sounds
+                noise.start();
+                oscillator.start();
+                
+                noise.stop(audioContext.currentTime + 0.1);
+                oscillator.stop(audioContext.currentTime + 0.2);
+            }
+        }
+
+        function playCollisionSound() {
+            if (isMuted) return;
+
+            if (collisionSoundBuffer) {
+                const source = audioContext.createBufferSource();
+                const gainNode = audioContext.createGain();
+                
+                source.buffer = collisionSoundBuffer;
+                gainNode.gain.value = 0.1;
+                
+                source.connect(gainNode);
+                gainNode.connect(masterGain);
+                
+                source.start();
+                source.stop(audioContext.currentTime + collisionSoundBuffer.duration);
+            } else {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.type = 'triangle';
+                oscillator.frequency.value = 660;
+                
+                gainNode.gain.value = 0.1;
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(masterGain);
+                
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.1);
+            }
+        }
+
+        function previewSound(buffer) {
+            if (isMuted) return;
+            
+            const source = audioContext.createBufferSource();
+            const gainNode = audioContext.createGain();
+            
+            source.buffer = buffer;
+            gainNode.gain.value = 0.5;
+            
+            source.connect(gainNode);
+            gainNode.connect(masterGain);
+            
+            source.start();
+            source.stop(audioContext.currentTime + buffer.duration);
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            masterGain.gain.value = isMuted ? 0 : 0.5;
+            document.getElementById('muteButton').textContent = isMuted ? '🔇 Unmute' : '🔊 Mute';
+        }
+
+        // Game state
+        let smallCircles = [];
+        let particles = [];
+        let patternType = 'particles';
+        let ballX = CENTER_X;
+        let ballY = CENTER_Y - (ARENA_RADIUS - INITIAL_BALL_RADIUS);
+        let ballDx = 25;
+        let ballDy = 0;
+        let arenaAngle = 0;
+        let ballRadius = INITIAL_BALL_RADIUS;
+        let instanceStartTime = 0;
+        let noCollisionTime = 0;
+        let isPaused = false;
+        let lastTime = 0;
+        let accumulatedTime = 0;
+        let ballImage = null;
+
+        // Colors
+        const WHITE = '#FFFFFF';
+        const BLACK = '#000000';
+        const GRAY = '#AAAAAA';
+        let BALL_COLOR = '#0000FF';
+        let CIRCLE_COLOR = '#FFFFFF';
+        let CIRCLE_OPACITY = 1.0;
+        let ARENA_BACKGROUND = '#000000';
+
+        // Recording state
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let isRecording = false;
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        backgroundImage = img;
+                        // Redraw the game with the new background
+                        if (!isPaused) {
+                            gameLoop(performance.now());
+                        }
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function generateSmallCircles() {
+            const circles = [];
+            const vertSpacing = SMALL_RADIUS * 2;  // Reduced vertical spacing
+            const yMin = CENTER_Y - ARENA_RADIUS + SMALL_RADIUS;
+            const yMax = CENTER_Y + ARENA_RADIUS - SMALL_RADIUS;
+            let rowIndex = 0;
+            
+            for (let y = yMin; y <= yMax; y += vertSpacing) {
+                const xStart = CENTER_X - ARENA_RADIUS + (rowIndex % 2 === 0 ? SMALL_RADIUS : SMALL_RADIUS * 2);
+                const xMax = CENTER_X + ARENA_RADIUS - SMALL_RADIUS;
+                
+                for (let x = xStart; x <= xMax; x += SMALL_RADIUS * 2) {
+                    const distSq = Math.pow(x - CENTER_X, 2) + Math.pow(y - CENTER_Y, 2);
+                    if (distSq <= Math.pow(ARENA_RADIUS - SMALL_RADIUS, 2)) {
+                        // Store the initial position and angle
+                        const dx = x - CENTER_X;
+                        const dy = y - CENTER_Y;
+                        const radius = Math.sqrt(dx * dx + dy * dy);
+                        const angle = Math.atan2(dy, dx);
+                        circles.push({ radius, angle });
+                    }
+                }
+                rowIndex++;
+            }
+            return circles;
+        }
+
+        function generateParticles() {
+            const newParticles = [];
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const radius = Math.random() * (ARENA_RADIUS - SMALL_RADIUS);
+                const x = CENTER_X + radius * Math.cos(angle);
+                const y = CENTER_Y + radius * Math.sin(angle);
+                newParticles.push({
+                    x,
+                    y,
+                    angle,
+                    radius,
+                    speed: (Math.random() * 0.5 + 0.5) * PARTICLE_SPEED
+                });
+            }
+            return newParticles;
+        }
+
+        function updateParticles() {
+            particles.forEach(particle => {
+                particle.angle += particle.speed * 0.01;
+                particle.x = CENTER_X + particle.radius * Math.cos(particle.angle);
+                particle.y = CENTER_Y + particle.radius * Math.sin(particle.angle);
+            });
+        }
+
+        function updatePatternType(type) {
+            patternType = type;
+            const particleCountInput = document.getElementById('particleCountInput');
+            if (type === 'particles') {
+                particles = generateParticles();
+                particleCountInput.classList.add('visible');
+            } else {
+                smallCircles = generateSmallCircles();
+                particleCountInput.classList.remove('visible');
+            }
+        }
+
+        function resetGame() {
+            if (isRecording) {
+                stopRecording();
+            }
+            if (patternType === 'particles') {
+                particles = generateParticles();
+                document.getElementById('particleCountInput').classList.add('visible');
+            } else {
+                smallCircles = generateSmallCircles();
+                document.getElementById('particleCountInput').classList.remove('visible');
+            }
+            ballX = CENTER_X;
+            ballY = CENTER_Y - (ARENA_RADIUS - INITIAL_BALL_RADIUS);
+            ballDx = 25;
+            ballDy = 0;
+            arenaAngle = 0;
+            ballRadius = INITIAL_BALL_RADIUS;
+            instanceStartTime = performance.now() / 1000;
+            noCollisionTime = 0;
+            updateStats();
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+            if (!isPaused) {
+                lastTime = performance.now();
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        function updateStats() {
+            ballSizeElement.textContent = Math.round(ballRadius);
+        }
+
+        function updateBallColor(color) {
+            BALL_COLOR = color;
+        }
+
+        function updateCircleColor(color) {
+            CIRCLE_COLOR = color;
+        }
+
+        function updateCircleOpacity(value) {
+            CIRCLE_OPACITY = value / 100;
+            document.getElementById('opacityValue').textContent = value + '%';
+        }
+
+        function updateArenaColor(color) {
+            ARENA_BACKGROUND = color;
+        }
+
+        function updateParticleCount(count) {
+            const maxParticles = 5000;
+            const minParticles = 100;
+            PARTICLE_COUNT = Math.max(minParticles, Math.min(maxParticles, parseInt(count)));
+            if (patternType === 'particles') {
+                particles = generateParticles();
+            }
+        }
+
+        function drawGrid() {
+            const gridSize = GRID_SIZE;
+            const startX = CENTER_X - ARENA_RADIUS;
+            const startY = CENTER_Y - ARENA_RADIUS;
+            const endX = CENTER_X + ARENA_RADIUS;
+            const endY = CENTER_Y + ARENA_RADIUS;
+
+            for (let x = startX; x <= endX; x += gridSize) {
+                for (let y = startY; y <= endY; y += gridSize) {
+                    const dx = x - CENTER_X;
+                    const dy = y - CENTER_Y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist <= ARENA_RADIUS) {
+                        ctx.fillRect(x, y, 2, 2);
+                    }
+                }
+            }
+        }
+
+        function drawHexagons() {
+            const size = HEX_SIZE;
+            const width = size * 2;
+            const height = size * Math.sqrt(3);
+            const startX = CENTER_X - ARENA_RADIUS;
+            const startY = CENTER_Y - ARENA_RADIUS;
+            const endX = CENTER_X + ARENA_RADIUS;
+            const endY = CENTER_Y + ARENA_RADIUS;
+
+            for (let y = startY; y <= endY; y += height) {
+                for (let x = startX; x <= endX; x += width * 1.5) {
+                    const dx = x - CENTER_X;
+                    const dy = y - CENTER_Y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist <= ARENA_RADIUS) {
+                        drawHexagon(x, y, size);
+                    }
+                }
+            }
+        }
+
+        function drawHexagon(x, y, size) {
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                const angle = (i * Math.PI * 2) / 6;
+                const px = x + size * Math.cos(angle);
+                const py = y + size * Math.sin(angle);
+                if (i === 0) {
+                    ctx.moveTo(px, py);
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawDots() {
+            const dotSize = DOT_SIZE;
+            const spacing = 4;
+            const startX = CENTER_X - ARENA_RADIUS;
+            const startY = CENTER_Y - ARENA_RADIUS;
+            const endX = CENTER_X + ARENA_RADIUS;
+            const endY = CENTER_Y + ARENA_RADIUS;
+
+            for (let x = startX; x <= endX; x += spacing) {
+                for (let y = startY; y <= endY; y += spacing) {
+                    const dx = x - CENTER_X;
+                    const dy = y - CENTER_Y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist <= ARENA_RADIUS) {
+                        ctx.beginPath();
+                        ctx.arc(x, y, dotSize, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+        }
+
+        function drawLines() {
+            const spacing = LINE_SPACING;
+            const startAngle = 0;
+            const endAngle = Math.PI * 2;
+            const steps = 36;
+
+            for (let i = 0; i < steps; i++) {
+                const angle = startAngle + (endAngle - startAngle) * (i / steps);
+                const x1 = CENTER_X + (ARENA_RADIUS - spacing) * Math.cos(angle);
+                const y1 = CENTER_Y + (ARENA_RADIUS - spacing) * Math.sin(angle);
+                const x2 = CENTER_X + ARENA_RADIUS * Math.cos(angle);
+                const y2 = CENTER_Y + ARENA_RADIUS * Math.sin(angle);
+
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+            }
+        }
+
+        function drawGradient() {
+            const gradient = ctx.createRadialGradient(
+                CENTER_X, CENTER_Y, 0,
+                CENTER_X, CENTER_Y, ARENA_RADIUS
+            );
+            gradient.addColorStop(0, CIRCLE_COLOR);
+            gradient.addColorStop(1, ARENA_BACKGROUND);
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(CENTER_X, CENTER_Y, ARENA_RADIUS, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function gameLoop(timestamp) {
+            if (isPaused) return;
+
+            // Calculate time since last frame
+            const currentTime = timestamp;
+            const deltaTime = currentTime - lastFrameTime;
+            lastFrameTime = currentTime;
+
+            // Accumulate time
+            accumulatedTime += deltaTime;
+
+            // Only update physics at target FPS
+            if (accumulatedTime >= frameInterval) {
+                const physicsDeltaTime = frameInterval / 1000; // Convert to seconds
+
+                // Update ball radius based on elapsed time
+                const timeSinceInstanceStart = (currentTime / 1000) - instanceStartTime;
+                ballRadius = INITIAL_BALL_RADIUS * Math.pow(1 + BALL_GROWTH_RATE, timeSinceInstanceStart);
+
+                // Physics update
+                ballDy += GRAVITY;
+                ballX += ballDx * physicsDeltaTime;
+                ballY += ballDy * physicsDeltaTime;
+
+                // Boundary bounce
+                const distFromCenter = Math.hypot(ballX - CENTER_X, ballY - CENTER_Y);
+                if (distFromCenter + ballRadius >= ARENA_RADIUS) {
+                    const overlap = (distFromCenter + ballRadius) - ARENA_RADIUS;
+                    const nx = (ballX - CENTER_X) / distFromCenter;
+                    const ny = (ballY - CENTER_Y) / distFromCenter;
+                    
+                    ballX -= nx * overlap;
+                    ballY -= ny * overlap;
+                    
+                    const dot = ballDx * nx + ballDy * ny;
+                    ballDx = ballDx - 2 * dot * nx;
+                    ballDy = ballDy - 2 * dot * ny;
+                    
+                    const bounceSpeed = Math.hypot(ballDx, ballDy);
+                    playBounceSound(bounceSpeed);
+                    
+                    ballDx *= BOUNCE_FACTOR;
+                    ballDy *= BOUNCE_FACTOR;
+                    
+                    ballDx += (Math.random() - 0.5) * RANDOM_BOUNCE * 2;
+                    ballDy += (Math.random() - 0.5) * RANDOM_BOUNCE * 2;
+                }
+
+                // Rotate arena
+                arenaAngle += ROTATION_SPEED * physicsDeltaTime;
+
+                // Update particles if in particle mode
+                if (patternType === 'particles') {
+                    updateParticles();
+                }
+
+                // Collisions with small circles or particles
+                if (patternType === 'circles') {
+                    const prevCount = smallCircles.length;
+                    smallCircles = smallCircles.filter(circle => {
+                        // Calculate current position of the small circle
+                        const currentAngle = circle.angle + arenaAngle;
+                        const circleX = CENTER_X + circle.radius * Math.cos(currentAngle);
+                        const circleY = CENTER_Y + circle.radius * Math.sin(currentAngle);
+                        
+                        const dx = circleX - ballX;
+                        const dy = circleY - ballY;
+                        const distance = Math.hypot(dx, dy);
+                        if (distance <= (ballRadius + SMALL_RADIUS)) {
+                            playCollisionSound();
+                            return false;
+                        }
+                        return true;
+                    });
+
+                    if (smallCircles.length < prevCount) {
+                        noCollisionTime = 0;
+                    } else {
+                        noCollisionTime += physicsDeltaTime;
+                    }
+                } else {
+                    // Particle collision detection
+                    const prevCount = particles.length;
+                    particles = particles.filter(particle => {
+                        const dx = particle.x - ballX;
+                        const dy = particle.y - ballY;
+                        const distance = Math.hypot(dx, dy);
+                        if (distance <= (ballRadius + SMALL_RADIUS)) {
+                            playCollisionSound();
+                            return false;
+                        }
+                        return true;
+                    });
+
+                    if (particles.length < prevCount) {
+                        noCollisionTime = 0;
+                    } else {
+                        noCollisionTime += physicsDeltaTime;
+                    }
+                }
+
+                // Check reset conditions
+                if ((patternType === 'circles' && smallCircles.length === 0) || 
+                    (patternType === 'particles' && particles.length === 0) || 
+                    noCollisionTime >= NO_COLLISION_LIMIT) {
+                    resetGame();
+                }
+
+                accumulatedTime -= frameInterval;
+            }
+
+            // Draw
+            ctx.fillStyle = ARENA_BACKGROUND;
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+            // Draw background image if available
+            if (backgroundImage) {
+                // Calculate the scale to fit the image within the arena
+                const scale = Math.min(
+                    (ARENA_RADIUS * 2) / backgroundImage.width,
+                    (ARENA_RADIUS * 2) / backgroundImage.height
+                );
+                const scaledWidth = backgroundImage.width * scale;
+                const scaledHeight = backgroundImage.height * scale;
+                
+                // Create a clipping path for the arena
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(CENTER_X, CENTER_Y, ARENA_RADIUS, 0, Math.PI * 2);
+                ctx.clip();
+                
+                // Draw the image centered in the arena
+                ctx.translate(CENTER_X, CENTER_Y);
+                ctx.rotate(arenaAngle);
+                ctx.drawImage(
+                    backgroundImage,
+                    -scaledWidth / 2,
+                    -scaledHeight / 2,
+                    scaledWidth,
+                    scaledHeight
+                );
+                ctx.restore();
+            }
+
+            // Draw arena
+            ctx.strokeStyle = GRAY;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(CENTER_X, CENTER_Y, ARENA_RADIUS, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Draw small circles or particles
+            ctx.fillStyle = CIRCLE_COLOR;
+            ctx.globalAlpha = CIRCLE_OPACITY;
+            
+            if (patternType === 'circles') {
+                smallCircles.forEach(circle => {
+                    const currentAngle = circle.angle + arenaAngle;
+                    const x = CENTER_X + circle.radius * Math.cos(currentAngle);
+                    const y = CENTER_Y + circle.radius * Math.sin(currentAngle);
+                    
+                    ctx.beginPath();
+                    ctx.arc(x, y, SMALL_RADIUS, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            } else if (patternType === 'particles') {
+                particles.forEach(particle => {
+                    ctx.beginPath();
+                    ctx.arc(particle.x, particle.y, SMALL_RADIUS, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            } else if (patternType === 'grid') {
+                drawGrid();
+            } else if (patternType === 'hexagon') {
+                drawHexagons();
+            } else if (patternType === 'dots') {
+                drawDots();
+            } else if (patternType === 'lines') {
+                drawLines();
+            } else if (patternType === 'gradient') {
+                drawGradient();
+            }
+            
+            ctx.globalAlpha = 1.0;
+
+            // Draw ball
+            ctx.save();
+            if (ballImage) {
+                // Create a clipping path for the ball
+                ctx.beginPath();
+                ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+                ctx.clip();
+                
+                // Draw the image centered on the ball
+                const size = ballRadius * 2;
+                ctx.drawImage(ballImage, ballX - ballRadius, ballY - ballRadius, size, size);
+            } else {
+                ctx.fillStyle = BALL_COLOR;
+                ctx.beginPath();
+                ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
+
+            updateStats();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function startRecording() {
+            // Create a MediaStreamDestination to capture audio
+            const audioDestination = audioContext.createMediaStreamDestination();
+            masterGain.disconnect();
+            masterGain.connect(audioDestination);
+            
+            // Get the canvas stream
+            const canvasStream = canvas.captureStream(60);
+            
+            // Combine video and audio streams
+            const combinedStream = new MediaStream([
+                ...canvasStream.getVideoTracks(),
+                ...audioDestination.stream.getAudioTracks()
+            ]);
+            
+            recordedChunks = [];
+            
+            // Try MP4 first, fallback to WebM if not supported
+            const mimeTypes = [
+                'video/mp4;codecs=avc1.42E01E,mp4a.40.2',  // H.264 + AAC
+                'video/webm;codecs=vp9,opus',
+                'video/webm;codecs=vp8,opus'
+            ];
+            
+            let selectedMimeType = '';
+            for (const mimeType of mimeTypes) {
+                if (MediaRecorder.isTypeSupported(mimeType)) {
+                    selectedMimeType = mimeType;
+                    break;
+                }
+            }
+            
+            if (!selectedMimeType) {
+                alert('Recording not supported in this browser. Please try a different browser.');
+                return;
+            }
+
+            const isMP4 = selectedMimeType.includes('mp4');
+            
+            mediaRecorder = new MediaRecorder(combinedStream, {
+                mimeType: selectedMimeType,
+                videoBitsPerSecond: 2500000, // 2.5 Mbps
+                audioBitsPerSecond: 128000   // 128 kbps
+            });
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    recordedChunks.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = () => {
+                // Reconnect audio to speakers
+                masterGain.disconnect();
+                masterGain.connect(audioContext.destination);
+                
+                const fileExtension = isMP4 ? 'mp4' : 'webm';
+                const blob = new Blob(recordedChunks, { type: selectedMimeType });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `ball-game-recording-${new Date().toISOString()}.${fileExtension}`;
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 100);
+            };
+
+            mediaRecorder.start();
+            isRecording = true;
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                isRecording = false;
+                
+                // Reconnect audio to speakers
+                masterGain.disconnect();
+                masterGain.connect(audioContext.destination);
+            }
+        }
+
+        function removeBackgroundImage() {
+            backgroundImage = null;
+            if (!isPaused) {
+                gameLoop(performance.now());
+            }
+        }
+
+        function resetAndRecord() {
+            // Stop any existing recording
+            if (isRecording) {
+                stopRecording();
+            }
+            
+            // Reset the game
+            resetGame();
+            
+            // Start recording after a short delay to ensure the game is reset
+            setTimeout(() => {
+                startRecording();
+            }, 100);
+        }
+
+        function updateGravity(value) {
+            GRAVITY = parseFloat(value);
+            document.getElementById('gravityValue').textContent = value;
+        }
+
+        function updateInitialBallSize(value) {
+            INITIAL_BALL_RADIUS = parseFloat(value);
+            resetGame();
+        }
+
+        function updateGrowthRate(value) {
+            BALL_GROWTH_RATE = parseFloat(value);
+        }
+
+        function handleBounceSoundUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                loadSoundFile(file, function(buffer) {
+                    bounceSoundBuffer = buffer;
+                });
+            }
+        }
+
+        function handleCollisionSoundUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                loadSoundFile(file, function(buffer) {
+                    collisionSoundBuffer = buffer;
+                });
+            }
+        }
+
+        function previewBounceSound() {
+            if (bounceSoundBuffer) {
+                previewSound(bounceSoundBuffer);
+            }
+        }
+
+        function previewCollisionSound() {
+            if (collisionSoundBuffer) {
+                previewSound(collisionSoundBuffer);
+            }
+        }
+
+        function handleBallImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        ballImage = img;
+                        // Redraw the game with the new ball image
+                        if (!isPaused) {
+                            gameLoop(performance.now());
+                        }
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeBallImage() {
+            ballImage = null;
+            if (!isPaused) {
+                gameLoop(performance.now());
+            }
+        }
+
+        // Initialize game
+        resetGame();
+        lastTime = performance.now();
+        lastFrameTime = performance.now();
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html> 
